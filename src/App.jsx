@@ -1,34 +1,64 @@
-import { Typography } from "antd";
+import { lazy, Suspense } from "react";
+import { QueryClient, QueryClientProvider } from "react-query";
+import { ReactQueryDevtools } from "react-query/devtools";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
-import Layout from "./components/Layout";
 
+import AuthWrappper from "./components/AuthWrapper";
+import FourOhFour from "./components/FourOhFour";
+import PageLoader from "./components/PageLoader";
+const Auth = lazy(() => import("./contexts/Auth"));
+const Dashboard = lazy(() => import("./Pages/Dashboard"));
+const Inventory = lazy(() => import("./Pages/Inventory"));
+const Login = lazy(() => import("./Pages/Login"));
+const SignUp = lazy(() => import("./Pages/Signup"));
+const Sell = lazy(() => import("./Pages/Sell"));
+
+const queryClient = new QueryClient({});
 const App = () => {
     return (
-        <BrowserRouter>
-            <Layout>
-                <Routes>
-                    <Route path="/" element={<Dashboard />} />
-                    <Route path="/inventory" element={<Inventory />} />
-                    <Route path="/sell" element={<Sell />} />
-                </Routes>
-            </Layout>
-        </BrowserRouter>
+        <QueryClientProvider client={queryClient}>
+            <BrowserRouter>
+                <Suspense fallback={<PageLoader />}>
+                    <Routes>
+                        <Route path="/login" element={<Login />} />
+                    </Routes>
+                    <Routes>
+                        <Route path="/signup" element={<SignUp />} />
+                    </Routes>
+                    <Auth>
+                        <Routes>
+                            <Route
+                                path="/"
+                                element={
+                                    <AuthWrappper>
+                                        <Dashboard />
+                                    </AuthWrappper>
+                                }
+                            />
+                            <Route
+                                path="/inventory"
+                                element={
+                                    <AuthWrappper>
+                                        <Inventory />
+                                    </AuthWrappper>
+                                }
+                            />
+                            <Route
+                                path="/sell"
+                                element={
+                                    <AuthWrappper>
+                                        <Sell />
+                                    </AuthWrappper>
+                                }
+                            />
+                            <Route path="*" element={<FourOhFour />} />
+                        </Routes>
+                    </Auth>
+                </Suspense>
+            </BrowserRouter>
+            <ReactQueryDevtools initialIsOpen={false} />
+        </QueryClientProvider>
     );
-};
-
-const Dashboard = () => {
-    return <Typography.Title level={2}>Dashboard</Typography.Title>;
-};
-
-const Inventory = () => {
-    return <Typography.Title level={2}>Inventory</Typography.Title>;
-};
-
-const Sell = () => {
-    return <Typography.Title level={2}>Sell</Typography.Title>;
-};
-const FourOhFour = () => {
-    return <Typography.Title level={2}>FourOhFour</Typography.Title>;
 };
 
 export default App;

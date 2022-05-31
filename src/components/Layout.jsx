@@ -1,7 +1,8 @@
 import { DesktopOutlined, FileOutlined, UserOutlined } from "@ant-design/icons";
-import { Image, Layout, Menu } from "antd";
+import { Button, Layout, Menu, Row, Space, Typography } from "antd";
 import { memo, useEffect, useMemo, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
+import { useAuth } from "../contexts";
 const { Header, Content, Sider } = Layout;
 function getItem(label, key, icon, link, children) {
     return {
@@ -13,13 +14,16 @@ function getItem(label, key, icon, link, children) {
     };
 }
 
-const items = [
-    getItem("Dashboard", "1", DesktopOutlined, ""),
-    getItem("Inventory", "2", UserOutlined, "inventory"),
-    getItem("Make Sell", "3", FileOutlined, "sell"),
-];
-
 const CustomLayout = memo(({ children }) => {
+    const { user, logout } = useAuth();
+    const items = useMemo(
+        () => [
+            getItem("Dashboard", "1", DesktopOutlined, ""),
+            getItem("Inventory", "2", UserOutlined, "inventory"),
+            getItem("Make Sell", "3", FileOutlined, "sell"),
+        ],
+        []
+    );
     const navigate = useNavigate();
     const [collapsed, setCollapsed] = useState(false);
     const [activeKey, setActiveKey] = useState("1");
@@ -29,16 +33,6 @@ const CustomLayout = memo(({ children }) => {
         const key = path.split("/")[1];
         setActiveKey(items.filter((e) => e.link === key)?.[0]?.key);
     }, []);
-    const menuItems = useMemo(() =>
-        items.map((item) => (
-            <Menu.Item key={item.key} onClick={() => setActiveKey(item.key)}>
-                <Link to={item.link}>
-                    <item.icon />
-                    <span>{item.label}</span>
-                </Link>
-            </Menu.Item>
-        ))
-    );
     return (
         <Layout
             style={{
@@ -50,12 +44,13 @@ const CustomLayout = memo(({ children }) => {
                 collapsed={collapsed}
                 onCollapse={(value) => setCollapsed(value)}
             >
-                <Image
+                <img
                     width={130}
                     style={{
                         marginLeft: "20px",
                         marginTop: "8px",
                     }}
+                    alt="logo"
                     src="images/logo-snap-it.webp"
                 />
                 <Menu
@@ -65,16 +60,44 @@ const CustomLayout = memo(({ children }) => {
                     selectedKeys={[activeKey]}
                     mode="inline"
                 >
-                    {menuItems}
+                    {items.map((item) => {
+                        return (
+                            <Menu.Item
+                                key={item.key}
+                                // onClick={() => setActiveKey(item.key)}
+                            >
+                                <NavLink to={item.link}>
+                                    <item.icon />
+                                    <span>{item.label}</span>
+                                </NavLink>
+                            </Menu.Item>
+                        );
+                    })}
                 </Menu>
             </Sider>
             <Layout className="site-layout">
                 <Header
                     className="site-layout-background"
                     style={{
-                        padding: 0,
+                        padding: "auto",
                     }}
-                />
+                >
+                    <Row justify="end" align="middle" style={{}}>
+                        <Space>
+                            <Typography.Title
+                                level={3}
+                                style={{
+                                    color: "white",
+                                }}
+                            >
+                                Hi {user?.name.split(" ")[0]} !!!
+                            </Typography.Title>
+                            <Button onClick={logout} type="primary">
+                                Log out
+                            </Button>
+                        </Space>
+                    </Row>
+                </Header>
                 <Content
                     style={{
                         margin: "0 16px",
