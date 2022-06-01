@@ -4,11 +4,9 @@ import { memo, useEffect, useMemo, useState } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
 import { useAuth } from "../contexts";
 const { Header, Content, Sider } = Layout;
-function getItem(label, key, icon, link, children) {
+function getItem(label, key, link) {
     return {
         key,
-        icon,
-        children,
         label,
         link,
     };
@@ -18,21 +16,53 @@ const CustomLayout = memo(({ children }) => {
     const { user, logout } = useAuth();
     const items = useMemo(
         () => [
-            getItem("Dashboard", "1", DesktopOutlined, ""),
-            getItem("Inventory", "2", UserOutlined, "inventory"),
-            getItem("Make Sell", "3", FileOutlined, "sell"),
+            getItem(
+                <NavLinkItem
+                    item={{
+                        link: "/",
+                        icon: DesktopOutlined,
+                        label: "Dashboard",
+                    }}
+                />,
+                "1",
+                ""
+            ),
+            getItem(
+                <NavLinkItem
+                    item={{
+                        link: "/inventory",
+                        icon: UserOutlined,
+                        label: "Inventory",
+                    }}
+                />,
+                "2",
+                "inventory"
+            ),
+            getItem(
+                <NavLinkItem
+                    item={{
+                        link: "/sell",
+                        icon: FileOutlined,
+                        label: "Sell",
+                    }}
+                />,
+                "3",
+                "sell"
+            ),
         ],
         []
     );
     const navigate = useNavigate();
     const [collapsed, setCollapsed] = useState(false);
-    const [activeKey, setActiveKey] = useState("1");
+    const [activeKey, setActiveKey] = useState(null);
     useEffect(() => {
         // get the active key from the url
         const path = window.location.pathname;
         const key = path.split("/")[1];
+        console.log(key);
         setActiveKey(items.filter((e) => e.link === key)?.[0]?.key);
     }, []);
+
     return (
         <Layout
             style={{
@@ -59,21 +89,11 @@ const CustomLayout = memo(({ children }) => {
                     defaultSelectedKeys={["1"]}
                     selectedKeys={[activeKey]}
                     mode="inline"
-                >
-                    {items.map((item) => {
-                        return (
-                            <Menu.Item
-                                key={item.key}
-                                // onClick={() => setActiveKey(item.key)}
-                            >
-                                <NavLink to={item.link}>
-                                    <item.icon />
-                                    <span>{item.label}</span>
-                                </NavLink>
-                            </Menu.Item>
-                        );
-                    })}
-                </Menu>
+                    items={items}
+                    // onSelect={({ key }) => {
+                    //     setActiveKey(key);
+                    // }}
+                />
             </Sider>
             <Layout className="site-layout">
                 <Header
@@ -107,6 +127,23 @@ const CustomLayout = memo(({ children }) => {
                 </Content>
             </Layout>
         </Layout>
+    );
+});
+
+const NavLinkItem = memo(({ item }) => {
+    const { link, icon: Icon, label } = item;
+    return (
+        <NavLink
+            to={link}
+            style={{
+                textDecoration: "none",
+            }}
+        >
+            <Space>
+                <Icon />
+                <span>{label}</span>
+            </Space>
+        </NavLink>
     );
 });
 

@@ -1,19 +1,18 @@
 import { Button, Col, Form, Input, Row, Space, Typography } from "antd";
-import React from "react";
+import React, { memo } from "react";
 import { useMutation } from "react-query";
 import { Link, useNavigate } from "react-router-dom";
-import { login } from "../api";
+import { login as loginAPI } from "../api";
 import { useAuth } from "../contexts";
 
-const Login = () => {
+const Login = memo(() => {
     const navigate = useNavigate();
+    const { login } = useAuth();
     const onSuccess = ({ data }) => {
-        localStorage.setItem("accessToken", data.tokens.access.token);
-        localStorage.setItem("refreshToken", data.tokens.refresh.token);
-        localStorage.setItem("user", JSON.stringify(data.user));
-        navigate("/");
+        login({ ...data });
+        navigate("/", { replace: true, state: { from: "/login" } });
     };
-    const { mutate } = useMutation("login", (values) => login(values), {
+    const { mutate } = useMutation("login", (values) => loginAPI(values), {
         onSuccess,
     });
     const onFinish = async (values) => {
@@ -87,6 +86,6 @@ const Login = () => {
             </Col>
         </Row>
     );
-};
+});
 
 export default Login;
