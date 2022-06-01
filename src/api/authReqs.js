@@ -12,6 +12,11 @@ import axios from "axios";
 export const login = async (values) => {
     return axios.post(`v1/auth/login`, values);
 };
+export const logout = async () => {
+    return axios.post(`v1/auth/logout`, {
+        refreshToken: localStorage.getItem("refreshToken"),
+    });
+};
 
 /**
  *

@@ -1,5 +1,5 @@
 import { Button, Col, Form, Input, Row, Space, Typography } from "antd";
-import React, { memo } from "react";
+import React, { memo, useEffect } from "react";
 import { useMutation } from "react-query";
 import { Link, useNavigate } from "react-router-dom";
 import { login as loginAPI } from "../api";
@@ -18,6 +18,12 @@ const Login = memo(() => {
     const onFinish = async (values) => {
         await mutate(values);
     };
+
+    useEffect(() => {
+        if (localStorage.getItem("accessToken")) {
+            navigate("/", { replace: true });
+        }
+    }, []);
 
     return (
         <Row

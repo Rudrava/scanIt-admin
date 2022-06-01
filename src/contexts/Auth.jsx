@@ -1,5 +1,8 @@
 import React, { memo, useCallback, useEffect, useMemo } from "react";
+import { useMutation, useQuery } from "react-query";
 import { useNavigate } from "react-router-dom";
+import { logout as logoutAPI } from "../api";
+import PageLoader from "../components/PageLoader";
 const AuthContext = React.createContext({
     isAuthenticated: false,
     isLoadingUser: false,
@@ -14,13 +17,17 @@ const Auth = memo(({ children }) => {
     const [user, setUser] = React.useState(null);
     const [isAuthenticated, setIsAuthenticated] = React.useState(false);
     const [isLoadingUser, setIsLoadingUser] = React.useState(false);
-    const [error, setError] = React.useState(null);
+    const [error] = React.useState(null);
+
+    const { mutate } = useMutation(logoutAPI, {
+        onSuccess: () => {
+            localStorage.clear();
+            navigate("/login", { replace: true });
+        },
+    });
 
     const logout = useCallback(() => {
-        setUser(null);
-        setIsAuthenticated(false);
-        localStorage.clear();
-        navigate("/login", { replace: true });
+        mutate();
     }, [navigate]);
 
     const login = useCallback(({ user, tokens }) => {
@@ -32,13 +39,18 @@ const Auth = memo(({ children }) => {
     }, []);
 
     useEffect(() => {
+        setIsLoadingUser(true);
         const token = localStorage.getItem("accessToken");
         const user = JSON.parse(localStorage.getItem("user"));
-        console.log(!!token);
-        if (token) {
+        if (!!token && !!user) {
             setIsAuthenticated(true);
             setUser((e) => (!e ? user : e));
+        } else {
+            setIsLoadingUser(false);
+            navigate("/login", { replace: true });
         }
+
+        setIsLoadingUser(false);
     }, []);
 
     const value = useMemo(
@@ -53,7 +65,9 @@ const Auth = memo(({ children }) => {
         [isLoadingUser, isAuthenticated, user, error, logout, login]
     );
 
-    return (
+    return isLoadingUser ? (
+        <PageLoader />
+    ) : (
         <AuthContext.Provider value={{ ...value }}>
             {children}
         </AuthContext.Provider>

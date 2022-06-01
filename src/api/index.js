@@ -5,7 +5,7 @@ export * from "./authReqs";
 axios.defaults.baseURL =
     process.env.NODE_ENV === "developement"
         ? "http://localhost:3333"
-        : "https://api.todo-app-react.vercel.app";
+        : "https://scanit-api-demo-1.herokuapp.com";
 console.log();
 
 axios.interceptors.request.use((config) => {
@@ -14,7 +14,7 @@ axios.interceptors.request.use((config) => {
 
 // catch errors here
 axios.interceptors.response.use(
-    (res) => res,
+    (res) => (res.status === 204 ? { status: true } : res),
     (error) => {
         message.error(error.response.data.message);
     }

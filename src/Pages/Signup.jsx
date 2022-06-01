@@ -14,19 +14,20 @@ import { Link, useNavigate } from "react-router-dom";
 import { signup } from "../api";
 
 const Signup = () => {
-    const naviagte = useNavigate();
+    const navigate = useNavigate();
     const onSuccess = () => {
         message.info("Signup successful! Please login with the same creds");
-        naviagte("/login");
+        navigate("/login");
     };
-
-    const { data, mutate, isSuccess } = useMutation(
-        "signup",
-        (values) => signup(values),
-        {
-            onSuccess,
+    useEffect(() => {
+        if (localStorage.getItem("accessToken")) {
+            navigate("/", { replace: true });
         }
-    );
+    }, []);
+
+    const { mutate } = useMutation("signup", (values) => signup(values), {
+        onSuccess,
+    });
     const onFinish = async (values) => {
         await mutate(values);
     };

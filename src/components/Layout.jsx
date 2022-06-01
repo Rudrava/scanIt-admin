@@ -1,7 +1,7 @@
 import { DesktopOutlined, FileOutlined, UserOutlined } from "@ant-design/icons";
 import { Button, Layout, Menu, Row, Space, Typography } from "antd";
 import { memo, useEffect, useMemo, useState } from "react";
-import { NavLink, useNavigate } from "react-router-dom";
+import { NavLink } from "react-router-dom";
 import { useAuth } from "../contexts";
 const { Header, Content, Sider } = Layout;
 function getItem(label, key, link) {
@@ -52,14 +52,12 @@ const CustomLayout = memo(({ children }) => {
         ],
         []
     );
-    const navigate = useNavigate();
     const [collapsed, setCollapsed] = useState(false);
     const [activeKey, setActiveKey] = useState(null);
     useEffect(() => {
         // get the active key from the url
         const path = window.location.pathname;
         const key = path.split("/")[1];
-        console.log(key);
         setActiveKey(items.filter((e) => e.link === key)?.[0]?.key);
     }, []);
 
